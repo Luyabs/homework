@@ -1,0 +1,24 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+    int n;
+    while(cin>>n)
+    {
+        float t1,t2;
+        {
+            t1=80+((n*1.0)/3.5);
+            t2=(n*1.0)/1.5;
+            if(t1<t2)
+                cout<<"Bike"<<endl;
+            else if(t1==t2)
+                cout<<"All"<<endl;
+            else
+                cout<<"Walk"<<endl;
+
+        }
+    }
+    return 0;
+}
