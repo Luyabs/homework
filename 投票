@@ -1,9 +1,25 @@
 #include <iostream>
-#include<stdlib.h>
-#include<fstream>
-#include<string>
+#include <stdlib.h>
+#include <fstream>
+#include <string>
+#include <cstring>
 
 using namespace std;
+
+void VoterSearch();
+void VoteSearch();
+void HighOutput();
+void VoterAdd();
+void VoterDelete();
+void VoteRevision();
+void Save();
+void DataCount(); //运算各个问题的累计票数
+void Reset(); //清空链表
+void menu();
+
+//全局变量
+    int mch=1,mchoice=0;
+    int count[26][100];
 
 //结构体建立
 struct voter
@@ -175,11 +191,67 @@ void Save()
 
 }
 
-void DataCount()
+void DataCount(voter *head) //运算各个问题的累计票数
 {
-
+     mch=1,mchoice=0;
+     memset(count,0,sizeof(count));
+     voter *p=head,*q=NULL;
+     while (p != NULL)
+     {
+        if (p == head)
+        {
+            mchoice++; //count→count[1][1]
+            count[mch][mchoice]++; //count[1][1]=1
+            if (p->imp == "vip") count[mch][mchoice]+=2;
+        }
+        else
+        {
+            if (p->ch != q->ch)
+            {
+                mch++;
+                if (mch > 1) mchoice=0;
+                if (p->choice != q->choice)
+                {
+                    mchoice++;
+                    count[mch][mchoice]++;
+                    if (p->imp == "vip") count[mch][mchoice]+=2;
+                }
+                else
+                {
+                    count[mch][mchoice]++;
+                    if (p->imp == "vip") count[mch][mchoice]+=2;
+                }
+            }
+            else
+            {
+                if (p->choice != q->choice)
+                {
+                    mchoice++;
+                    count[mch][mchoice]++;
+                    if (p->imp == "vip") count[mch][mchoice]+=2;
+                }
+                else
+                {
+                    count[mch][mchoice]++;
+                    if (p->imp == "vip") count[mch][mchoice]+=2;
+                }
+            }
+        }
+     q=p;
+     p=p->next1;
+     }
 }
 
+void Reset(voter *head) //清空链表
+{
+  	voter *p;
+  	while(head != NULL)
+  	{
+  		p = head;
+   		head = head->next1;
+  		delete p;
+ 	}
+}
 
 void menu()
 {
