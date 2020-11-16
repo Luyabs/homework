@@ -1,265 +1,357 @@
 #include <iostream>
-#include <fstream>
-#include <cstring>
-
-void Calculate_Count ();//统计每个问题中选项的票数 ！！！使用Search_LinkedList，Add_New_voter_vote_X 前必须使用此函数
-void Display_vote_X ();//输出vote_X(控制台)
-void Output_vote_X ();//输出vote_X(txt文档)
-void Display_LinkedList ();//输出链表本体(控制台)
-void Output_LinkedList ();//输出链表本体(txt文档)
-void Search_LinkedList ();//查询用户信息(当前不能查询用户账号)
-void Add_New_voter_vote_X();//新增用户信息(当前存在若干问题)
-void Delete_LinkedList ();//清空结点
+#include<stdlib.h>
+#include<fstream>
+#include<string>
 
 using namespace std;
 
+//结构体建立
 struct voter
 {
-    string name;//投票人姓名
-    string question;//投票问题编号
-    string choice;//投票问题选项
-    string vip;//是否为VIP
-    voter *next;
+    string name;
+    string ch;
+    string choice;
+    string imp;
+    voter *next1;
 };
 
-    string name,question;
-    int mark_question=1,mark_choice=0;
-    int count[26][100];
-    char X;
-
-voter *Create_LinkedList ()//创建链表本体
+struct vote
 {
-    ifstream fin("INPUT.txt");
+    string place;
+    string ticket;
+    vote *next2;
+};
+
+//链表建立
+voter *CreateList()
+{
+    ifstream in("voter.txt");
     voter *head=NULL,*p,*q;
     p = new voter;
-    while (fin>>p->name)
+    while (in>>p->name)
     {
-        fin>>p->question;
-        fin>>p->choice;
-        fin>>p->vip;
+        in>>p->ch;
+        in>>p->choice;
+        in>>p->imp;
         if (head==NULL) head=p;
-        else q->next=p;
+        else q->next1=p;
         q=p;
         p = new voter;
     }
-    if (head != NULL) q->next=NULL;
-    fin.close();
+    if (head != NULL)
+        q->next1=NULL;
+    in.close();
     return head;
 }
 
-void Calculate_Count (voter *head)//统计每个问题中选项的票数 ！！！使用Search_LinkedList，Add_New_voter_vote_X 前必须使用此函数
+vote *CreateList_a()
 {
-     voter *p=head,*q=NULL;
-     while (p != NULL)
-     {
-        if (p == head)
-        {
-            mark_choice++; //count→count[1][1]
-            count[mark_question][mark_choice]++; //count[1][1]=1
-            if (p->vip == "vip") count[mark_question][mark_choice]+=2;
-        }
+    ifstream in("vote_a.txt");
+    vote *head=NULL,*p,*q;
+    p = new vote;
+    while (in>>p->place)
+    {
+        in>>p->ticket;
+        if (head==NULL)
+            head=p;
         else
-        {
-            if (p->question != q->question)
-            {
-                mark_question++;
-                if (mark_question > 1) mark_choice=0;
-                if (p->choice != q->choice)
-                {
-                    mark_choice++;
-                    count[mark_question][mark_choice]++;
-                    if (p->vip == "vip") count[mark_question][mark_choice]+=2;
-                }
-                else
-                {
-                    count[mark_question][mark_choice]++;
-                    if (p->vip == "vip") count[mark_question][mark_choice]+=2;
-                }
-            }
-            else
-            {
-                if (p->choice != q->choice)
-                {
-                    mark_choice++;
-                    count[mark_question][mark_choice]++;
-                    if (p->vip == "vip") count[mark_question][mark_choice]+=2;
-                }
-                else
-                {
-                    count[mark_question][mark_choice]++;
-                    if (p->vip == "vip") count[mark_question][mark_choice]+=2;
-                }
-            }
-        }
-     q=p;
-     p=p->next;
-     }
+        q->next2=p;
+        q=p;
+        p = new vote;
+    }
+    if (head != NULL)
+        q->next2=NULL;
+    in.close();
+    return head;
 }
 
-void Display_vote_X (voter *head , char X)//输出vote_X(控制台)
+vote *CreateList_b()
 {
-    //cout<<"要查询哪个投票问题:"; cin>>X; //服务于下一行的函数
-    int count2=0,flag=0;
-    voter *p=head,*q=NULL;
-    while (p != NULL)
+    ifstream in("vote_b.txt");
+    vote *head=NULL,*p,*q;
+    p = new vote;
+    while (in>>p->place)
     {
-        if (p == head && p->question[0] == X)
-        {
-            count2++;
-            cout<<p->choice<<' '<<count[X-'a'+1][count2]<<endl;
-            flag++;
-        }
-        else if (p->question[0] == X && p->choice != q->choice)
-        {
-            count2++;
-            cout<<p->choice<<' '<<count[X-'a'+1][count2]<<endl;
-            flag++;
-        }
-    q=p;
-    p=p->next;
+        in>>p->ticket;
+        if (head==NULL)
+            head=p;
+        else
+        q->next2=p;
+        q=p;
+        p = new vote;
     }
-    if (flag == 0) cout<<"没有找到投票问题"<<X<<endl;
+    if (head != NULL)
+        q->next2=NULL;
+    in.close();
+    return head;
 }
 
-/*void Output_vote_X (voter *head , char X)//输出vote_X(txt文档) //目前用不了
+void VoterSearch()
 {
-    //服务于下一行的函数
-    int count2=0;
-    voter *p=head,*q=NULL;
-    ofstream fout ("vote_a.txt");
-    while (p != NULL)
-    {
-        if (p == head && p->question[0] == X)
-        {
-            count2++;
-            fout<<p->choice<<' '<<count[X-'a'+1][count2]<<endl;
-        }
-        else if (p->question[0] == X && p->choice != q->choice)
-        {
-            count2++;
-            fout<<p->choice<<' '<<count[X-'a'+1][count2]<<endl;
-        }
-    q=p;
-    p=p->next;
-    }
-    fout.close();
-}*/
-
-void Display_LinkedList (voter *head)//输出链表本体(控制台)
-{
-    voter *p=head;
-    while (p!=NULL)
-    {
-        cout<<p->name<<' '<<p->question<<' '<<p->choice<<' '<<p->vip<<endl;
-        p=p->next;
-    }
-}
-
-void Output_LinkedList (voter *head)//输出链表本体(txt文档)
-{
-    voter *p=head;
-    ofstream fout("voter.txt");
-    if (head==NULL) cout<<"当前没有任何账户"<<endl;
-    while (p!=NULL)
-    {
-        fout<<p->name<<' '<<p->question<<' '<<p->choice<<' '<<p->vip<<endl;
-        p=p->next;
-    }
-    fout.close();
-}
-
-void Search_LinkedList (voter *head)//查询用户信息(当前不能查询用户账号)
-{
-
-    string searching_name; cout<<"请输入需要搜索的用户名:"; cin>>searching_name;
+    string str,s;
+    cin>>str;
+    ifstream in("voter.txt");
     int flag=0;
-    voter *p=head;
-    while (p != NULL)
+    while(getline(in,s))
     {
-        if (p->name == searching_name)
+        int x=s.find(str);
+        if(x!=-1)
         {
-            cout<<p->name<<' '<<p->question<<' '<<p->choice<<' '<<p->vip<<endl;
-            p=p->next;
             flag=1;
+            cout<<s<<endl;
         }
-        else p=p->next;
     }
-    if (flag != 1) cout<<"没有找到该用户"<<endl;
+    if(flag==0)
+            cout<<"没有找到此人"<<endl;
 }
 
-void Add_New_voter_vote_X(voter *head)//新增用户信息 当前问题：1.未尝试表中无人的情况 2.不能增加question不存在的选项 3.还不能对txt文档进行修改
+void VoteSearch()
 {
-    int flag=0;
-    voter *p=head,*NEW=new voter;
-    cout<<"请输入想新增的姓名与投票问题编号(使用空格隔开):"; cin>>NEW->name>>NEW->question;
-    while (p != NULL)
+    char ch;
+    string s;
+    cin>>ch;
+    if(ch=='a')
     {
-        if (p->name == NEW->name && p->question == NEW->question)
-            {cout<<"不能重复投票!"<<endl;  flag=1;  if(flag==1) break;}
-        p=p->next;
+        ifstream in("vote_a.txt");
+        while(getline(in,s))
+        {
+            cout<<s<<endl;
+        }
     }
-    if(flag == 0)
+    else if(ch=='b')
     {
-        Display_vote_X (head , NEW->question[0]);
-        cout<<"你想给哪个选项投票(可以新增一个选项):"; cin>>NEW->choice;
-        cout<<"你是否为VIP(请输入vip或输入not):"; cin>>NEW->vip;
-        p=head;
-        while (p != NULL)
+        ifstream inn("vote_b.txt");
+        while(getline(inn,s))
         {
-            if(p->question == NEW->question) break;
-            p=p->next;
+            cout<<s<<endl;
         }
-        if (p != NULL)
-        {
-            NEW->next=p->next;
-            p->next=NEW;
-        }
-        Calculate_Count (head);//重计票数
     }
+    else
+    cout<<"没有找到此投票问题"<<endl;
 }
 
-/*void Delete_voter_vote_X (voter *head)//
+void HighOutput()
 {
-    int flag=0;
-    voter *p=head,*DEL=new voter;
-    cout<<"请输入要删除的姓名与投票问题编号(使用空格隔开):"; cin>>DEL->name>>DEL->question;
-    while (p != NULL)
+    char ch;
+    string s;
+    cin>>ch;
+    if(ch=='a')
     {
-        if (p->name == DEL->name && p->question == DEL->question)
-            {cout<<"不能重复投票!"<<endl;  flag=1;  if(flag==1) break;}
-        p=p->next;
+        ifstream in("vote_a.txt");
+        while(getline(in,s))
+        {
+            cout<<s<<endl;
+        }
     }
-    if(flag == 0)
+    else if(ch=='b')
     {
-
-
-
+        ifstream inn("vote_b.txt");
+        while(getline(inn,s))
+        {
+            cout<<s<<endl;
+        }
     }
-}*/
+    else
+    cout<<"没有找到此投票问题"<<endl;
+}
 
-void Delete_LinkedList (voter *head)//清空结点
+void VoterAdd()
 {
-  	voter *p;
-  	while(head != NULL)
-  	{
-  		p = head;
-   		head = head->next;
-  		delete p;
- 	}
+
+}
+
+void VoterDelete()
+{
+
+}
+
+void VoteRevision()
+{
+
+}
+
+void Save()
+{
+
+}
+
+void DataCount()
+{
+
+}
+
+
+void menu()
+{
+    cout <<"欢迎使用投票系统"<< endl;
+    cout<<"操作投票人请输入1"<<endl;
+    cout<<"操作投票问题请输入2"<<endl;
+    cout<<"保存投票人与投票问题信息请按3"<<endl;
+    cout<<"退出系统请输入0"<<endl;
+    int a,b;//一二级菜单
+    cin>>a;
+    if(a==1)
+    {
+       system("cls");
+       system("pause");
+       system("cls");
+       cout<<"查询投票人信息请按1"<<endl;
+       cout<<"新增投票人信息请按2"<<endl;
+       cout<<"删除投票人信息请按3"<<endl;
+       cout<<"退出系统请输入0"<<endl;
+       cin>>b;
+       if(b==1)
+       {
+           system("cls");
+           system("pause");
+           system("cls");
+           cout<<"请输入待查投票人的账号或者姓名"<<endl;
+           VoterSearch();
+           cout<<"回到主菜单请输入1"<<endl<<"退出程序请输入0"<<endl;
+           int c;
+           cin>>c;
+           if(c==1)
+                system("cls");
+                system("pause");
+                system("cls");
+                menu();
+           if(c==0)
+                system("exit");
+       }
+       if(b==2)
+       {
+            system("cls");
+            system("pause");
+            system("cls");
+            cout<<"请输入该投票人的姓名与投票问题编号"<<endl;
+            VoterAdd();
+            int c;
+            cin>>c;
+            if(c==1)
+                system("cls");
+                system("pause");
+                system("cls");
+                menu();
+            if(c==0)
+                system("exit");
+
+
+       }
+       if(b==3)
+       {
+            system("cls");
+            system("pause");
+            system("cls");
+            cout<<"请输入要删除投票人的姓名与投票问题编号"<<endl;
+            VoterDelete();
+            int c;
+            cin>>c;
+            if(c==1)
+                system("cls");
+                system("pause");
+                system("cls");
+                menu();
+            if(c==0)
+                system("exit");
+
+       }
+       if(b==0)
+       {
+           system("exit");
+       }
+    }
+    if(a==2)
+    {
+        system("cls");
+        system("pause");
+        system("cls");
+        cout<<"查询投票问题请按1"<<endl;
+        cout<<"修改投票问题信息请按2"<<endl;
+        cout<<"输出最高票选项请按3"<<endl;
+        cout<<"退出系统请输入0"<<endl;
+        cin>>b;
+        if(b==1)
+        {
+            system("cls");
+            system("pause");
+            system("cls");
+            cout<<"请输入所要查询的投票问题"<<endl;
+            VoteSearch();
+            cout<<"回到主菜单请输入1"<<endl<<"退出程序请输入0"<<endl;
+            int c;
+            cin>>c;
+            if(c==1)
+                system("cls");
+                system("pause");
+                system("cls");
+                menu();
+            if(c==0)
+                system("exit");
+        }
+        if(b==2)
+        {
+            system("cls");
+            system("pause");
+            system("cls");
+            cout<<"请输入要修改的投票问题"<<endl;
+            VoteRevision();
+            cout<<"回到主菜单请输入1"<<endl<<"退出程序请输入0"<<endl;
+            int c;
+            cin>>c;
+            if(c==1)
+                system("cls");
+                system("pause");
+                system("cls");
+                menu();
+            if(c==0)
+                system("exit");
+        }
+        if(b==3)
+        {
+            system("cls");
+            system("pause");
+            system("cls");
+            cout<<"请输入所要查询的投票问题"<<endl;
+            HighOutput();
+            cout<<"回到主菜单请输入1"<<endl<<"退出程序请输入0"<<endl;
+            int c;
+            cin>>c;
+            if(c==1)
+                system("cls");
+                system("pause");
+                system("cls");
+                menu();
+            if(c==0)
+                system("exit");
+        }
+        if(b==0)
+        {
+            system("exit");
+        }
+    }
+    if(a==3)
+    {
+        system("cls");
+        system("pause");
+        system("cls");
+        Save();
+        cout<<"回到主菜单请输入1"<<endl<<"退出程序请输入0"<<endl;
+            int c;
+            cin>>c;
+            if(c==1)
+                system("cls");
+                system("pause");
+                system("cls");
+                menu();
+            if(c==0)
+                system("exit");
+
+    }
+    if(a==0)
+        system("exit");
 }
 
 int main()
 {
-    voter *head=NULL;
-    head=Create_LinkedList();
-    Output_LinkedList(head);
-    Display_LinkedList(head);
-    Search_LinkedList(head);
-    Calculate_Count(head);
-    //cout<<count[1][1]<<count[1][2]<<count[2][1]<<count[2][2]<<count[2][3]<<count[3][1]<<count[3][2]<<count[4][1]<<endl; //快速校验 详见备注的txt
-    cout<<"要查询哪个投票问题:"; cin>>X; Display_vote_X(head,X);
-    Add_New_voter_vote_X(head); Display_LinkedList(head);
-
-    Delete_LinkedList (head);
-    return 0;
+    menu();
 }
